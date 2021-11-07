@@ -1,0 +1,27 @@
+dist: bionic
+language: python
+
+matrix:
+  fast_finish: true
+  include:
+  - python: 3.6
+    env: PANDAS=0.23 NUMPY=1.14
+  - python: 3.7
+    env: PANDAS=0.25 NUMPY=1.17
+  allow_failures:
+    - python: 3.7
+      env: PANDAS="MASTER" NUMPY=1.17
+
+install:
+  - source ci/pypi-install.sh;
+  - pip list
+  - python setup.py install
+
+script:
+    - export EOD_HISTORICAL_API_KEY=$EOD_HISTORICAL_API_KEY
+    - pytest -s --cov=eod_historical_data --cov-report xml:/tmp/cov-eod_historical_data.xml --junitxml=/tmp/eod_historical_data.xml
+    - flake8 --version
+    - flake8 eod_historical_data tests
+
+after_success:
+  - coveralls
